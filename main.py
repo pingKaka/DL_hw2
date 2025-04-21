@@ -3,7 +3,6 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from api_client import LeagueStandingsFetcher,MatchScheduleFetcher
 
-# 修改main.py，增加以下内容
 class MatchDialog(tk.Toplevel):
     def __init__(self, parent, team_name, matches):
         super().__init__(parent)
@@ -56,52 +55,39 @@ class MatchDialog(tk.Toplevel):
             ))
 
 class StandingsApp(tk.Tk):
-    def __init__(self, standings_url, schedule_url, params):
+    def __init__(self, standings_url, schedule_url):
         super().__init__()
         self.title("足球联赛积分榜")
         self.geometry("1200x700")
-        
-        # 初始化数据获取器
-        self.standings_fetcher = LeagueStandingsFetcher(standings_url, params)
-        self.schedule_fetcher = MatchScheduleFetcher(schedule_url, params)
-        self.matches_data = None  # 存储赛程数据
         
         # 创建主容器
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill=tk.BOTH, expand=True)
         
-        # 创建第一个标签页（原有界面）
-        self.create_standings_tab()
-        
-        # 创建第二个空白标签页
-        self.create_sheet2_tab()
-        
-        # 加载数据
-        self.load_data()
+        League=[("英超","yingchao"),("西甲","xijia"),("德甲","dejia"),("意甲","yijia"),("法甲","fajia")]
+        for i, (cn,en) in enumerate(League):
+            self.create_standings_tab(cn)
+            params={
+            'key': '3b3813a690fd85a29cacf2014be208c6',
+            'type': en,
+        }
+            self.standings_fetcher = LeagueStandingsFetcher(standings_url, params)
+            self.schedule_fetcher = MatchScheduleFetcher(schedule_url, params)
+            self.matches_data = None
+            # 加载数据
+            self.load_data()
 
-    def create_standings_tab(self):
-            """创建积分榜标签页"""
-            tab1 = ttk.Frame(self.notebook)
-            self.notebook.add(tab1, text="英超")
-            
-            # 将原有界面元素移动到tab1中
-            self.create_header(tab1)
-            self.create_table(tab1)
-            self.create_footer(tab1)
 
-    def create_sheet2_tab(self):
-        """创建第二个空白标签页"""
-        tab2 = ttk.Frame(self.notebook)
-        self.notebook.add(tab2, text="Sheet2")
+    def create_standings_tab(self, text):
+        """创建积分榜标签页"""
+        tab = ttk.Frame(self.notebook)
+        self.notebook.add(tab, text=text)
         
-        # 添加占位内容
-        placeholder = ttk.Label(
-            tab2,
-            text="这是预留的第二个页面\n可用于扩展其他功能",
-            font=('Arial', 14),
-            foreground='gray'
-        )
-        placeholder.pack(expand=True, pady=100)        
+        # 将原有界面元素移动到tab中
+        self.create_header(tab)
+        self.create_table(tab)
+        self.create_footer(tab)
+    
 
     def create_header(self,parent):
         header_frame = ttk.Frame(parent)
@@ -139,13 +125,6 @@ class StandingsApp(tk.Tk):
             self.tree.heading(columns[idx], text=text)
             self.tree.column(columns[idx], width=width, anchor='center')
         
-        self.tree = ttk.Treeview(
-            container,
-            columns=columns,
-            show='headings',
-            selectmode='extended',
-            height=20
-        )
 
         # 添加滚动条
         scrollbar = ttk.Scrollbar(container, orient=tk.VERTICAL, command=self.tree.yview)
@@ -245,9 +224,6 @@ if __name__ == "__main__":
     # 使用示例API地址
     STANDINGS_API = "http://apis.juhe.cn/fapig/football/rank"
     SCHEDULE_API = "http://apis.juhe.cn/fapig/football/query"
-    PARAMS={
-    'key': '3b3813a690fd85a29cacf2014be208c6',
-    'type': 'yingchao',
-}
-    app = StandingsApp(STANDINGS_API, SCHEDULE_API, PARAMS)
+
+    app = StandingsApp(STANDINGS_API, SCHEDULE_API)
     app.mainloop()
