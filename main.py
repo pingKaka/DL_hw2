@@ -56,7 +56,7 @@ class MatchDialog(tk.Toplevel):
             ))
 
 class StandingsApp(tk.Tk):
-    def __init__(self, standings_url, schedule_url , params):
+    def __init__(self, standings_url, schedule_url, params):
         super().__init__()
         self.title("足球联赛积分榜")
         self.geometry("1200x700")
@@ -66,26 +66,52 @@ class StandingsApp(tk.Tk):
         self.schedule_fetcher = MatchScheduleFetcher(schedule_url, params)
         self.matches_data = None  # 存储赛程数据
         
-        # 创建界面元素
-        self.create_header()
-        self.create_table()
-        self.create_footer()
+        # 创建主容器
+        self.notebook = ttk.Notebook(self)
+        self.notebook.pack(fill=tk.BOTH, expand=True)
+        
+        # 创建第一个标签页（原有界面）
+        self.create_standings_tab()
+        
+        # 创建第二个空白标签页
+        self.create_sheet2_tab()
         
         # 加载数据
         self.load_data()
 
-    def create_header(self):
-        header_frame = ttk.Frame(self)
+    def create_standings_tab(self):
+            """创建积分榜标签页"""
+            tab1 = ttk.Frame(self.notebook)
+            self.notebook.add(tab1, text="英超")
+            
+            # 将原有界面元素移动到tab1中
+            self.create_header(tab1)
+            self.create_table(tab1)
+            self.create_footer(tab1)
+
+    def create_sheet2_tab(self):
+        """创建第二个空白标签页"""
+        tab2 = ttk.Frame(self.notebook)
+        self.notebook.add(tab2, text="Sheet2")
+        
+        # 添加占位内容
+        placeholder = ttk.Label(
+            tab2,
+            text="这是预留的第二个页面\n可用于扩展其他功能",
+            font=('Arial', 14),
+            foreground='gray'
+        )
+        placeholder.pack(expand=True, pady=100)        
+
+    def create_header(self,parent):
+        header_frame = ttk.Frame(parent)
         header_frame.pack(pady=10)
         
         self.title_label = ttk.Label(header_frame, font=('Arial', 16, 'bold'))
         self.title_label.pack()
-        
-        self.duration_label = ttk.Label(header_frame, font=('Arial', 12))
-        self.duration_label.pack()
 
-    def create_table(self):
-        container = ttk.Frame(self)
+    def create_table(self,parent):
+        container = ttk.Frame(parent)
         container.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
         
         # 创建Treeview表格
@@ -113,18 +139,25 @@ class StandingsApp(tk.Tk):
             self.tree.heading(columns[idx], text=text)
             self.tree.column(columns[idx], width=width, anchor='center')
         
+        self.tree = ttk.Treeview(
+            container,
+            columns=columns,
+            show='headings',
+            selectmode='extended',
+            height=20
+        )
+
         # 添加滚动条
         scrollbar = ttk.Scrollbar(container, orient=tk.VERTICAL, command=self.tree.yview)
         self.tree.configure(yscrollcommand=scrollbar.set)
         
         self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
         
         self.tree.bind("<Double-1>", self.on_team_click)
 
-    def create_footer(self):
-        footer_frame = ttk.Frame(self)
+    def create_footer(self,parent):
+        footer_frame = ttk.Frame(parent)
         footer_frame.pack(pady=5)
         
         refresh_btn = ttk.Button(
@@ -142,7 +175,6 @@ class StandingsApp(tk.Tk):
             # 获取积分榜数据
             standings_data = self.standings_fetcher.fetch_standings()
             self.title_label.config(text=standings_data['title'])
-            self.duration_label.config(text=f"赛季：{standings_data['duration']}")
             
             # 清空现有数据
             for i in self.tree.get_children():

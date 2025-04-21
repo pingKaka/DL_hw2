@@ -26,7 +26,7 @@ class LeagueStandingsFetcher:
         except KeyError as e:
             raise Exception(f"数据解析错误: 缺少必要字段 {str(e)}")
 
-# 修改api_client.py，添加新的数据获取类
+
 class MatchScheduleFetcher:
     def __init__(self, api_url, params):
         self.api_url = api_url
