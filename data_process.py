@@ -195,9 +195,10 @@ class StandingsApp(tk.Tk):
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill=tk.BOTH, expand=True)
         
-        League=[("英超","yingchao"),("西甲","xijia")]
+        #生成不同联赛的排行表
+        League=[("英超","yingchao"),("西甲","xijia"),("德甲","dejia"),("意甲","yijia"),("法甲","fajia")]
         for i, (cn,en) in enumerate(League):
-            s=pra()
+            s=pra() #创建新表格实例
             self.create_standings_tab(cn, s)
             params={
             'key': '3b3813a690fd85a29cacf2014be208c6',
@@ -215,7 +216,6 @@ class StandingsApp(tk.Tk):
         tab = ttk.Frame(self.notebook)
         self.notebook.add(tab, text=text)
         
-        # 将原有界面元素移动到tab中
         pra0.create_header(tab)
         pra0.create_table(tab)
         pra0.create_footer(tab)
