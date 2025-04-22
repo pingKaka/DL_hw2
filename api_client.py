@@ -1,4 +1,3 @@
-# api_client.py
 import requests
 
 class LeagueStandingsFetcher:
